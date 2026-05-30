@@ -26,17 +26,18 @@ module Announcements
   
 		date_month = date.strftime("%B")
 		date_day = date.day
-		day_suffix = ""
-  
-		case date_day
-		when 1, 21
-		  day_suffix = "st"
-		when 2, 22
-		  day_suffix = "nd"
-		when 3, 23
-		  day_suffix = "rd"
+		# Ordinal suffix rules:
+		# - 11, 12, 13 are special-cased to 'th'
+		# - otherwise use last digit: 1->st, 2->nd, 3->rd, else th
+		day_suffix = if (11..13).include?(date_day % 100)
+			"th"
 		else
-		  day_suffix = "th"
+			case date_day % 10
+			when 1 then "st"
+			when 2 then "nd"
+			when 3 then "rd"
+			else "th"
+			end
 		end
   
 		{
