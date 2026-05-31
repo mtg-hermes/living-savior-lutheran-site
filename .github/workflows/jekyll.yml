@@ -34,7 +34,8 @@ jobs:
         EOF
 
     - name: Deploy preview via FTP
-      if: github.event_name == 'pull_request'
+      # Fork PRs do not receive repository secrets, so this step must be skipped.
+      if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && secrets.FTP_USERNAME != '' && secrets.FTP_PASSWORD != ''
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ftp.livingsaviorlutheran.org
