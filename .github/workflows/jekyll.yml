@@ -34,14 +34,18 @@ jobs:
         EOF
 
     - name: Deploy preview via FTP
-      # Fork PRs do not receive repository secrets, so this step must be skipped.
-      # NOTE: GitHub Actions does NOT allow referencing `secrets.*` in an `if:` expression.
-      if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+      # Fork PRs do not receive repository secrets.
+      # Also: do NOT reference `secrets.*` in an `if:` expression (can behave unexpectedly).
+      # Instead, map secrets to env vars and gate on env.
+      env:
+        FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+        FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && env.FTP_USERNAME != '' && env.FTP_PASSWORD != ''
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ftp.livingsaviorlutheran.org
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD  }}
+        username: ${{ env.FTP_USERNAME }}
+        password: ${{ env.FTP_PASSWORD }}
         local-dir: ./_site/
         server-dir: /preview.livingsaviorlutheran.org/
 
